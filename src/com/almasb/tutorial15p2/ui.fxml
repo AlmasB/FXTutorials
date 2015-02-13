@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.*?>
+<?import java.lang.*?>
+<?import javafx.collections.*?>
+<?import javafx.beans.property.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.paint.Color?>
+<?import javafx.animation.*?>
+<?import javafx.util.*?>
+
+<Pane prefWidth="800" prefHeight="600" xmlns:fx="http://javafx.com/fxml">
+    <fx:define>
+        <Integer fx:id="APP_W" fx:value="800" />
+        <Integer fx:id="APP_H" fx:value="600" />
+    </fx:define>
+
+    <Rectangle fx:id="BG" width="$APP_W" height="$APP_H" />
+        
+    <Rectangle fx:id="loadingCircle" translateX="${BG.width - 120}" translateY="${BG.height - 150}"
+        width="40" height="40" fill="transparent" stroke="white" strokeWidth="2" />
+        
+    <ProgressBar fx:id="progressBar" translateX="100" translateY="${BG.height - 70}" prefWidth="600" progress="0"
+        style="-fx-accent: rgb(0, 255, 0)" />
+
+    <fx:define>      
+        <RotateTransition fx:id="loadingCircleAnimation" byAngle="-360"
+            node="$loadingCircle" duration="2.5s">
+            
+            <cycleCount>
+                <Animation fx:constant="INDEFINITE" />
+            </cycleCount>
+            
+            <interpolator>
+                <Interpolator fx:constant="LINEAR" />
+            </interpolator>
+            
+        </RotateTransition>
+    </fx:define>
+</Pane>
+
