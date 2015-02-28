@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?language javascript?>
+
+<?import java.net.*?>
+<?import java.lang.*?>
+<?import javafx.beans.property.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.canvas.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.paint.Color?>
+
+<Pane prefWidth="600" prefHeight="600" xmlns:fx="http://javafx.com/fxml">
+    <Canvas fx:id="canvas" width="600" height="600" />
+    <fx:script source="js_drawing.js" />
+</Pane>
