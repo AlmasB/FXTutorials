@@ -2,6 +2,7 @@ package com.almasb.tutorial25;
 
 import java.util.List;
 import java.util.Random;
+import java.util.logging.Level;
 
 import javafx.animation.Interpolator;
 import javafx.animation.TranslateTransition;
@@ -12,6 +13,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
+import com.almasb.fxgl.FXGLLogger;
 import com.almasb.fxgl.GameApplication;
 import com.almasb.fxgl.GameSettings;
 import com.almasb.fxgl.entity.Control;
@@ -23,7 +25,7 @@ import com.almasb.fxgl.search.AStarNode;
 public class FXGLPacmanApp extends GameApplication {
 
     private enum Type implements EntityType {
-        WALL, PLAYER, ENEMY
+        WALL, PLAYER, ENEMY, BACKGROUND
     }
 
     private enum Action {
@@ -68,7 +70,7 @@ public class FXGLPacmanApp extends GameApplication {
 
     @Override
     protected void initGame(Pane gameRoot) {
-        addEntities(new Entity("BG").setGraphics(new Rectangle(600, 600)));
+        addEntities(Entity.noType().setGraphics(new Rectangle(600, 600)));
         initLevel();
         initPlayer();
         initEnemies();
@@ -154,6 +156,10 @@ public class FXGLPacmanApp extends GameApplication {
         addKeyPressBinding(KeyCode.D, () -> {
             action = Action.RIGHT;
         });
+
+        addKeyTypedBinding(KeyCode.SPACE, () -> {
+            System.out.println(saveScreenshot());
+        });
     }
 
     @Override
@@ -167,6 +173,7 @@ public class FXGLPacmanApp extends GameApplication {
         if (player.getTranslateX() + ENTITY_SIZE <= 0) {
             player.setTranslateX(600 - ENTITY_SIZE);
         }
+
     }
 
     private boolean canMove(Entity entity, Action move) {
