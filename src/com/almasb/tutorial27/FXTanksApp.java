@@ -63,7 +63,7 @@ public class FXTanksApp extends GameApplication {
 
     @Override
     protected void initGame(Pane gameRoot) {
-        Entity bg = new Entity("bg").setGraphics(new Rectangle(1280, 720));
+        Entity bg = Entity.noType().setGraphics(new Rectangle(1280, 720));
         addEntities(bg);
 
         for (int i = 0; i < 30; i++) {
