@@ -163,8 +163,8 @@ public class FXGLPacmanApp extends GameApplication {
                 .anyMatch(e -> e.getBoundsInParent().intersects(entity.getBoundsInParent()));
 
         if (!collision && !isPlayer) {
-            collision = entity.getTranslateX() < 0 || entity.getTranslateX() + 40 > 600
-                    || entity.getTranslateY() < 0 || entity.getTranslateY() + 40 > 600;
+            collision = entity.getTranslateX() < 0 || entity.getTranslateX() + ENTITY_SIZE >= 600
+                    || entity.getTranslateY() < 0 || entity.getTranslateY() + ENTITY_SIZE > 600;
         }
 
         entity.translate(-move.dx, -move.dy);
@@ -190,7 +190,7 @@ public class FXGLPacmanApp extends GameApplication {
         Entity enemy = new Entity(Type.ENEMY);
         enemy.setPosition(x, y);
 
-        Rectangle rect = new Rectangle(30, 30);
+        Rectangle rect = new Rectangle(ENTITY_SIZE, ENTITY_SIZE);
         rect.setFill(color);
         enemy.setGraphics(rect);
 
