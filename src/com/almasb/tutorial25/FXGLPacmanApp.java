@@ -2,7 +2,6 @@ package com.almasb.tutorial25;
 
 import java.util.List;
 import java.util.Random;
-import java.util.logging.Level;
 
 import javafx.animation.Interpolator;
 import javafx.animation.TranslateTransition;
@@ -13,7 +12,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
-import com.almasb.fxgl.FXGLLogger;
 import com.almasb.fxgl.GameApplication;
 import com.almasb.fxgl.GameSettings;
 import com.almasb.fxgl.entity.Control;
@@ -25,7 +23,7 @@ import com.almasb.fxgl.search.AStarNode;
 public class FXGLPacmanApp extends GameApplication {
 
     private enum Type implements EntityType {
-        WALL, PLAYER, ENEMY, BACKGROUND
+        WALL, PLAYER, ENEMY
     }
 
     private enum Action {
@@ -59,6 +57,7 @@ public class FXGLPacmanApp extends GameApplication {
 
     @Override
     protected void initSettings(GameSettings settings) {
+        settings.setTitle("FXGL Pacman");
         settings.setWidth(600);
         settings.setHeight(600);
     }
@@ -109,31 +108,12 @@ public class FXGLPacmanApp extends GameApplication {
         addEntities(player);
     }
 
-    Entity e = new Entity(Type.ENEMY);
-
     private void initEnemies() {
-        e.setPosition(45, 45);
+        Entity enemy = createEnemy(45, 45, Color.RED);
+        enemy.addControl(smartAI);
 
-        Rectangle rect = new Rectangle(30, 30);
-        rect.setFill(Color.RED);
-        e.setGraphics(rect);
-
-        e.addControl(smartAI);
-
-        addEntities(e);
-
-        ///////////////////////////////////////
-
-        Entity e2 = new Entity(Type.ENEMY);
-        e2.setPosition(525, 45);
-
-        Rectangle rect2 = new Rectangle(30, 30);
-        rect2.setFill(Color.GREEN);
-        e2.setGraphics(rect2);
-
-        e2.addControl(randomAI);
-
-        addEntities(e2);
+        Entity enemy2 = createEnemy(525, 45, Color.GREEN);
+        enemy2.addControl(randomAI);
     }
 
     @Override
@@ -158,7 +138,7 @@ public class FXGLPacmanApp extends GameApplication {
         });
 
         addKeyTypedBinding(KeyCode.SPACE, () -> {
-            System.out.println(saveScreenshot());
+            System.out.println(saveScreenshot() ? "Screenshot saved" : "Failed to save screenshot");
         });
     }
 
@@ -173,7 +153,6 @@ public class FXGLPacmanApp extends GameApplication {
         if (player.getTranslateX() + ENTITY_SIZE <= 0) {
             player.setTranslateX(600 - ENTITY_SIZE);
         }
-
     }
 
     private boolean canMove(Entity entity, Action move) {
@@ -207,46 +186,65 @@ public class FXGLPacmanApp extends GameApplication {
         tt.play();
     }
 
-    long last, last2 = 0;
-    Action move = Action.NONE;
+    private Entity createEnemy(int x, int y, Color color) {
+        Entity enemy = new Entity(Type.ENEMY);
+        enemy.setPosition(x, y);
 
-    private Control randomAI = (entity, now) -> {
-        moveEntity(entity, move);
+        Rectangle rect = new Rectangle(30, 30);
+        rect.setFill(color);
+        enemy.setGraphics(rect);
 
-        if (now - last2 < 1 * SECOND)
-            return;
+        addEntities(enemy);
+        return enemy;
+    }
 
-        move = Action.values()[random.nextInt(5)];
+    private Control randomAI = new Control() {
+        Action move = Action.NONE;
+        long lastTimeSwitched = 0;
 
-        last2 = now;
+        @Override
+        public void onUpdate(Entity entity, long now) {
+            moveEntity(entity, move);
+
+            if (now - lastTimeSwitched < 1 * SECOND)
+                return;
+
+            move = Action.values()[random.nextInt(5)];
+            lastTimeSwitched = now;
+        }
     };
 
-    private Control smartAI = (entity, now) -> {
-        if (now - last < 0.016 * 8 * 2 * SECOND)
-            return;
+    private Control smartAI = new Control() {
+        long lastTimeSwitched = 0;
 
-        int x = Math.abs(Math.min(14, (int)(player.getTranslateX() / 40)));
-        int y = Math.abs(Math.min(14, (int)(player.getTranslateY() / 40)));
-        target = aiGrid[x][y];
+        @Override
+        public void onUpdate(Entity entity, long now) {
+            if (now - lastTimeSwitched < 0.016 * 8 * 2 * SECOND)
+                return;
 
-        x = Math.abs(Math.min(14, (int)(e.getTranslateX() / 40)));
-        y = Math.abs(Math.min(14, (int)(e.getTranslateY() / 40)));
-        start = aiGrid[x][y];
+            int x = Math.abs(Math.min(14, (int)(player.getTranslateX() / 40)));
+            int y = Math.abs(Math.min(14, (int)(player.getTranslateY() / 40)));
+            target = aiGrid[x][y];
 
-        for (int i = 0; i < 15; i++) {
-            for (int j = 0; j < 15; j++) {
-                aiGrid[j][i].setHCost(Math.abs(target.getX() - i) + Math.abs(target.getY() - j));
+            x = Math.abs(Math.min(14, (int)(entity.getTranslateX() / 40)));
+            y = Math.abs(Math.min(14, (int)(entity.getTranslateY() / 40)));
+            start = aiGrid[x][y];
+
+            for (int i = 0; i < 15; i++) {
+                for (int j = 0; j < 15; j++) {
+                    aiGrid[j][i].setHCost(Math.abs(target.getX() - i) + Math.abs(target.getY() - j));
+                }
             }
-        }
 
-        List<AStarNode> path = ai.getPath(aiGrid, start, target);
-        if (path != null && path.size() > 0) {
-            x = path.get(0).getX() * 40;
-            y = path.get(0).getY() * 40;
+            List<AStarNode> path = ai.getPath(aiGrid, start, target);
+            if (path != null && path.size() > 0) {
+                x = path.get(0).getX() * 40;
+                y = path.get(0).getY() * 40;
 
-            moveEntity(entity, new Point2D(x + 5, y + 5));
+                moveEntity(entity, new Point2D(x + 5, y + 5));
+            }
+            lastTimeSwitched = now;
         }
-        last = now;
     };
 
     public static void main(String[] args) {
