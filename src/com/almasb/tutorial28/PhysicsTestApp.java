@@ -34,7 +34,7 @@ public class PhysicsTestApp extends GameApplication {
 
     @Override
     protected void initSettings(GameSettings settings) {
-        settings.setTitle("Mallet - Puck Simulation");
+        settings.setTitle("Physics Simulation Test");
     }
 
     @Override
