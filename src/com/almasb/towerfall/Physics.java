@@ -24,7 +24,7 @@ public class Physics {
         boolean movingRight = value > 0;
 
         for (int i = 0; i < Math.abs(value); i++) {
-            for (Entity platform : app.getEntities(Type.PLATFORM)) {
+            for (Entity platform : app.getSceneManager().getEntities(Type.PLATFORM)) {
                 if (e.getBoundsInParent().intersects(platform.getBoundsInParent())) {
                     if (movingRight) {
                         if (e.getTranslateX() + e.getWidth() == platform.getTranslateX()) {
@@ -52,7 +52,7 @@ public class Physics {
         boolean movingDown = value > 0;
 
         for (int i = 0; i < Math.abs(value); i++) {
-            for (Entity platform : app.getEntities(Type.PLATFORM)) {
+            for (Entity platform : app.getSceneManager().getEntities(Type.PLATFORM)) {
                 if (e.getBoundsInParent().intersects(platform.getBoundsInParent())) {
                     if (movingDown) {
                         if (e.getTranslateY() + e.getHeight() == platform.getTranslateY()) {

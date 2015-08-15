@@ -10,16 +10,22 @@ import com.almasb.fxgl.asset.Assets;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.EntityType;
 import com.almasb.fxgl.event.InputManager.Mouse;
+import com.almasb.fxgl.event.UserAction;
 import com.almasb.fxgl.physics.CollisionHandler;
+import com.almasb.fxgl.time.TimerManager;
 
+import javafx.animation.Animation;
+import javafx.animation.RotateTransition;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.geometry.Point2D;
+import javafx.scene.effect.BlendMode;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
+import javafx.util.Duration;
 
 public class TowerFallApp extends GameApplication {
 
@@ -45,13 +51,31 @@ public class TowerFallApp extends GameApplication {
         assets = assetManager.cache();
     }
 
+    Entity bg2 = Entity.noType();
+
     @Override
     protected void initGame() {
         Entity bg = Entity.noType();
-        Rectangle rect = new Rectangle(getWidth(), getHeight());
-        rect.setFill(Color.DARKGRAY);
-        bg.setGraphics(rect);
-        addEntities(bg);
+        bg.setScaleX(1.3);
+        bg.setScaleY(1.3);
+        bg.setGraphics(assets.getTexture("bg.jpg"));
+        sceneManager.addEntities(bg);
+
+
+        bg2.setGraphics(assets.getTexture("bg.jpg"));
+        bg2.setScaleX(1.3);
+        bg2.setScaleY(1.3);
+        //bg2.setOpacity(0.66);
+        bg2.setBlendMode(BlendMode.MULTIPLY);
+
+        RotateTransition rt = new RotateTransition(Duration.seconds(20), bg2);
+        rt.setFromAngle(-10);
+        rt.setToAngle(10);
+        rt.setCycleCount(Animation.INDEFINITE);
+        rt.setAutoReverse(true);
+        rt.play();
+
+        sceneManager.addEntities(bg2);
 
         //addPlatform(0, 200);
         //addPlatform(getWidth() - getWidth() / 3, 200);
@@ -60,7 +84,7 @@ public class TowerFallApp extends GameApplication {
         //addPlatform(getWidth() / 2 - getWidth() / 6, getHeight() / 2);
 
         player = new Entity(Type.PLAYER);
-        rect = new Rectangle(40, 40);
+        Rectangle rect = new Rectangle(40, 40);
 
         player.setGraphics(rect);
         player.setCollidable(true);
@@ -69,11 +93,11 @@ public class TowerFallApp extends GameApplication {
         player.setProperty("kills", new SimpleIntegerProperty());
         player.addControl(new PhysicsControl(physics));
 
-        addEntities(player);
+        sceneManager.addEntities(player);
 
-        addEnemy(1850, 150);
-        addEnemy(50, 150);
-        addEnemy(1850, 830);
+        //addEnemy(1850, 150);
+        //addEnemy(50, 150);
+        //addEnemy(1850, 830);
 
         nextLevel();
     }
@@ -102,7 +126,7 @@ public class TowerFallApp extends GameApplication {
 
                 IntegerProperty kills = arrow.<Entity>getProperty("owner").getProperty("kills");
                 kills.set(kills.get() + 1);
-                removeEntity(arrow);
+                sceneManager.removeEntity(arrow);
 
                 character.setControlsEnabled(false);
                 character.setVisible(false);
@@ -111,7 +135,7 @@ public class TowerFallApp extends GameApplication {
                 if (player == character)
                     inputManager.setProcessActions(false);
 
-                if (getEntities(Type.PLAYER).stream().filter(e -> e.isVisible()).count() < 2) {
+                if (sceneManager.getEntities(Type.PLAYER).stream().filter(e -> e.isVisible()).count() < 2) {
                     nextLevel();
                 }
             }
@@ -130,11 +154,11 @@ public class TowerFallApp extends GameApplication {
 
     @Override
     protected void initUI() {
-
+        debug.setFill(Color.WHITE);
         debug.setTranslateX(150);
         debug.setTranslateY(50);
 
-        addUINodes(debug);
+        sceneManager.addUINodes(debug);
     }
 
     private Mouse mouse = inputManager.getMouse();
@@ -142,34 +166,66 @@ public class TowerFallApp extends GameApplication {
 
     @Override
     protected void initInput() {
-        inputManager.addMouseClickedBinding(MouseButton.PRIMARY, () -> {
-            shootPlayerArrow();
-        });
+        inputManager.addAction(new UserAction("Left") {
+            @Override
+            protected void onAction() {
+                player.getControl(PhysicsControl.class).moveX(-5);
+            }
+        }, KeyCode.A);
 
-        inputManager.addKeyPressBinding(KeyCode.A, () -> {
-            player.getControl(PhysicsControl.class).moveX(-5);
-        });
-        inputManager.addKeyPressBinding(KeyCode.D, () -> {
-            player.getControl(PhysicsControl.class).moveX(5);
-        });
-        inputManager.addKeyPressBinding(KeyCode.W, () -> {
-            player.getControl(PhysicsControl.class).jump();
-        });
-        inputManager.addKeyPressBinding(KeyCode.L, () -> {
-            exit();
-        });
+        inputManager.addAction(new UserAction("Right") {
+            @Override
+            protected void onAction() {
+                player.getControl(PhysicsControl.class).moveX(5);
+            }
+        }, KeyCode.D);
+
+        inputManager.addAction(new UserAction("Jump") {
+            @Override
+            protected void onAction() {
+                player.getControl(PhysicsControl.class).jump();
+            }
+        }, KeyCode.W);
+
+        inputManager.addAction(new UserAction("Exit") {
+            @Override
+            protected void onActionBegin() {
+                exit();
+            }
+        }, KeyCode.L);
+
+        inputManager.addAction(new UserAction("Shoot") {
+            @Override
+            protected void onActionBegin() {
+                shootPlayerArrow();
+            }
+        }, MouseButton.PRIMARY);
+
+//        inputManager.addAction(new UserAction("PARTICLE") {
+//            @Override
+//            protected void onActionBegin() {
+//                m++;
+//                if (m < BlendMode.values().length)
+//                    mode = BlendMode.values()[m];
+//
+//                bg2.setBlendMode(mode);
+//                debug.setText(mode.toString());
+//            }
+//        }, KeyCode.F);
     }
+    int m = 0;
+    BlendMode mode = BlendMode.ADD;
 
     @Override
     protected void onUpdate() {
         if (once) {
             int i = 0;
-            for (Entity e : getEntities(Type.PLAYER)) {
+            for (Entity e : sceneManager.getEntities(Type.PLAYER)) {
                 Text text = new Text();
                 text.setTranslateX(50);
                 text.setTranslateY(50 * (++i));
                 text.textProperty().bind(e.<IntegerProperty>getProperty("kills").asString("Kills: [%d]"));
-                addUINodes(text);
+                sceneManager.addUINodes(text);
             }
 
             once = false;
@@ -194,10 +250,10 @@ public class TowerFallApp extends GameApplication {
             player.setTranslateY(getHeight());
         }
 
-        for (Entity e : getEntities(Type.PLAYER)) {
+        for (Entity e : sceneManager.getEntities(Type.PLAYER)) {
             EnemyControl control = e.getControl(EnemyControl.class);
             if (control != null) {
-                Optional<Entity> closest = getEntities(Type.PLAYER).stream()
+                Optional<Entity> closest = sceneManager.getEntities(Type.PLAYER).stream()
                     .filter(p -> p != e && p.isVisible())
                     .sorted((e1, e2) -> (int)e1.distance(e) - (int)e2.distance(e))
                     .findFirst();
@@ -208,7 +264,7 @@ public class TowerFallApp extends GameApplication {
     }
 
     private void nextLevel() {
-        getEntities(Type.PLAYER).forEach(character -> {
+        sceneManager.getEntities(Type.PLAYER).forEach(character -> {
             character.setControlsEnabled(true);
             character.setVisible(true);
             character.setCollidable(true);
@@ -231,7 +287,7 @@ public class TowerFallApp extends GameApplication {
 
         platforms.add(platform);
 
-        addEntities(platform);
+        sceneManager.addEntities(platform);
     }
 
     private void addEnemy(double x, double y) {
@@ -250,7 +306,7 @@ public class TowerFallApp extends GameApplication {
 
         enemy.addFXGLEventHandler(Event.SHOOTING, event -> shootEnemyArrow(event.getTarget()));
 
-        addEntities(enemy);
+        sceneManager.addEntities(enemy);
     }
 
     private void shootPlayerArrow() {
@@ -258,11 +314,11 @@ public class TowerFallApp extends GameApplication {
         arrow.setPosition(player.getCenter());
         arrow.setGraphics(assets.getTexture("arrow.png"));
         arrow.setCollidable(true);
-        arrow.setExpireTime(SECOND * 15);
+        arrow.setExpireTime(TimerManager.SECOND * 15);
         arrow.setProperty("owner", player);
         arrow.addControl(new ArrowControl(new Point2D(mouse.x, mouse.y).subtract(arrow.getPosition()), getScreenBounds()));
 
-        addEntities(arrow);
+        sceneManager.addEntities(arrow);
     }
 
     private void shootEnemyArrow(Entity enemy) {
@@ -270,11 +326,11 @@ public class TowerFallApp extends GameApplication {
         arrow.setPosition(enemy.getCenter());
         arrow.setGraphics(assets.getTexture("arrow.png"));
         arrow.setCollidable(true);
-        arrow.setExpireTime(SECOND * 15);
+        arrow.setExpireTime(TimerManager.SECOND * 15);
         arrow.setProperty("owner", enemy);
-        arrow.addControl(new ArrowControl(getClosestEntity(enemy, Type.PLAYER).get().getCenter().subtract(arrow.getPosition()), getScreenBounds()));
+        arrow.addControl(new ArrowControl(sceneManager.getClosestEntity(enemy, Type.PLAYER).get().getCenter().subtract(arrow.getPosition()), getScreenBounds()));
 
-        addEntities(arrow);
+        sceneManager.addEntities(arrow);
     }
 
     public static void main(String[] args) {
