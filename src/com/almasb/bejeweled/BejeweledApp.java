@@ -41,7 +41,7 @@ public class BejeweledApp extends Application {
 
         jewels = IntStream.range(0, W * H)
                 .mapToObj(i -> new Point2D(i % W, i / H))
-                .map(point -> new Jewel(point))
+                .map(Jewel::new)
                 .collect(Collectors.toList());
 
         root.getChildren().addAll(jewels);
