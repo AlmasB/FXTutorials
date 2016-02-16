@@ -1,6 +1,5 @@
 package com.almasb.l4d;
 
-import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
@@ -29,12 +28,23 @@ import java.util.Random;
  * Please don't reuse any of this code in other projects.
  * http://www.mojang.com/notch/j4k/l4kd/
  *
+ * Move your character with WASD.
+ * Press the left mouse button to fire.
+ * Press "R" to reload.
+ *
+ * The red bar is your health. When it runs out, you die.
+ * The yellow bar is your ammo. When it runs out, you have to use your pistol (click to fire).
+ * The yellow dashes is how many clips you're carrying. Every time you reload, you lose one.
+ *
+ * Red powerups restore health.
+ * Yellow powerups restore clips.
+ *
  * Conversion to JavaFX (WIP): Almas Baimagambetov (AlmasB) (almaslvl@gmail.com)
  */
 public class L4dFX extends Application {
 
     private boolean[] k = new boolean[32767];
-    private int m;
+    private int globalMouse;
 
 
 
@@ -46,7 +56,6 @@ public class L4dFX extends Application {
 
         Canvas canvas = new Canvas(240 * 3, 240 * 3);
         g = canvas.getGraphicsContext2D();
-
         g.scale(3, 3);
 
 //        AnimationTimer timer = new AnimationTimer() {
@@ -72,14 +81,17 @@ public class L4dFX extends Application {
 
         Random random = new Random();
         int[] pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
+
+        // 18 sprites in total, each with 4, 16? each sprite is 12x12
         int[] sprites = new int[18 * 4 * 16 * 12 * 12];
         int pix = 0;
 
-        for (int i = 0; i < 18; i++)
-        {
+        for (int i = 0; i < 18; i++) {
+            // player skin and clothes
             int skin = 0xFF9993;
             int clothes = 0xFFffff;
 
+            // monster skins
             if (i > 0)
             {
                 skin = 0xa0ff90;
@@ -123,17 +135,20 @@ public class L4dFX extends Application {
                             }
                             else
                             {
+                                // legs
                                 if (t == 1 && xPix > 1 && xPix < 4 && yPix > 3 && yPix < 8)
                                     col = skin;
 
                                 if (t == 3 && xPix > 8 && xPix < 11 && yPix > 3 && yPix < 8)
                                     col = skin;
 
+                                // torso
                                 if (xPix > 1 && xPix < 11 && yPix > 5 && yPix < 8)
                                 {
                                     col = clothes;
                                 }
 
+                                // head
                                 if (xPix > 4 && xPix < 8 && yPix > 4 && yPix < 8)
                                 {
                                     col = skin;
@@ -192,6 +207,19 @@ public class L4dFX extends Application {
                 int[] map = new int[1024 * 1024];
                 random = new Random(4329+level);
 
+                // data structure of 16 ints
+                // 0, 1 - x, y (center)
+                // 2 - direction [0..15]    ?
+                // 3 - how far travelled
+
+
+
+                // 8 - last time hit a border length ?
+                // 9 - AI aggro
+                // 10 - boolean (0, 1) if mob has been shot > 0
+                // 11 - boolean (0, 1) NOT
+
+                // 15 - map placement ?
                 int[] monsterData = new int[320 * 16];
 
                 {
@@ -208,8 +236,7 @@ public class L4dFX extends Application {
                         }
                     }
 
-                    for (i = 0; i < 70; i++)
-                    {
+                    for (i = 0; i < 70; i++) {
                         int w = random.nextInt(8) + 2;
                         int h = random.nextInt(8) + 2;
                         int xm = random.nextInt(64 - w - 2) + 1;
@@ -224,23 +251,20 @@ public class L4dFX extends Application {
                         xm *= 16;
                         ym *= 16;
 
-                        if (i==68)
-                        {
-                            monsterData[0] = xm+w/2;
-                            monsterData[1] = ym+h/2;
+                        if (i==68) {
+                            monsterData[0] = xm + w / 2;
+                            monsterData[1] = ym + h / 2;
                             monsterData[15] = 0x808080;
                             monsterData[11] = 1;
                         }
 
-                        xWin0 = xm+5;
-                        yWin0 = ym+5;
+                        xWin0 = xm + 5;
+                        yWin0 = ym + 5;
                         xWin1 = xm + w-5;
                         yWin1 = ym + h-5;
 
-
                         for (int y = ym; y < ym + h; y++) {
                             for (int x = xm; x < xm + w; x++) {
-
                                 int d = x - xm;
 
                                 if (xm + w - x - 1 < d)
@@ -269,10 +293,7 @@ public class L4dFX extends Application {
                             }
                         }
 
-
-
-                        for (int j = 0; j < 2; j++)
-                        {
+                        for (int j = 0; j < 2; j++) {
                             int xGap = random.nextInt(w - 24) + xm + 5;
                             int yGap = random.nextInt(h - 24) + ym + 5;
                             int ww = 5;
@@ -281,13 +302,11 @@ public class L4dFX extends Application {
                             xGap = xGap / 16 * 16 + 5;
                             yGap = yGap / 16 * 16 + 5;
 
-                            if (random.nextInt(2) == 0)
-                            {
+                            if (random.nextInt(2) == 0) {
                                 xGap = xm + (w - 5) * random.nextInt(2);
                                 hh = 11;
                             }
-                            else
-                            {
+                            else {
                                 ww = 11;
                                 yGap = ym + (h - 5) * random.nextInt(2);
                             }
@@ -322,14 +341,15 @@ public class L4dFX extends Application {
                 double offs = 30;
                 double playerDir = 0;
 
-                for (int i = 0; i < 512; i++)
-                {
+                for (int i = 0; i < 512; i++) {
                     brightness[i] = (int) (255.0 * offs / (i + offs));
                     if (i < 4)
                         brightness[i] = brightness[i] * i / 4;
                 }
 
                 random = new Random();
+
+                // main loop
                 while (true)
                 {
                     if (gameStarted)
@@ -343,15 +363,18 @@ public class L4dFX extends Application {
                         }
 
                         // Move player:
-                        int mouse = m;
-                        playerDir = Math.atan2(mouse / 240 - 120, mouse % 240 - 120);
+                        int mouse = globalMouse;
+                        playerDir = Math.atan2(mouse / W - W / 2, mouse % H - H / 2);
 
                         double shootDir = playerDir + (random.nextInt(100) - random.nextInt(100)) / 100.0 * 0.2;
                         double cos = Math.cos(-shootDir);
                         double sin = Math.sin(-shootDir);
 
+                        // position of player (camera center) in the world
                         int xCam = monsterData[0];
                         int yCam = monsterData[1];
+
+                        //System.out.println("xCam: " + xCam + " yCam: " + yCam);
 
                         for (int i = 0; i < 960; i++)
                         {
@@ -409,20 +432,22 @@ public class L4dFX extends Application {
                             }
                         }
 
-                        for (int y = 0; y < 240; y++) {
+                        // viewport
+                        for (int y = 0; y < H; y++) {
                             int xm = xCam - 120;
                             int ym = y + yCam - 120;
-                            for (int x = 0; x < 240; x++) {
+
+                            for (int x = 0; x < W; x++) {
                                 pixels[x + y * 240] = map[(xm + x + ym * 1024) & (1024 * 1024 - 1)];
                             }
                         }
 
                         int closestHitDist = 0;
-                        for (int j = 0; j < 250; j++)
-                        {
+                        for (int j = 0; j < 250; j++) {
                             int xm = xCam + (int) (cos * j / 2);
                             int ym = yCam - (int) (sin * j / 2);
-                            if (map[(xm + ym * 1024) & (1024 * 1024 - 1)] == 0xffffff) break;
+                            if (map[(xm + ym * 1024) & (1024 * 1024 - 1)] == 0xffffff)
+                                break;
                             closestHitDist = j / 2;
                         }
 
@@ -431,26 +456,26 @@ public class L4dFX extends Application {
                         {
                             int closestHit = 0;
 
-                            nextMonster: for (int m = 0; m < 256 + 16; m++)
-                            {
+                            // if m == 0 is player ?
+                            // 255 mobs + 16 items?
+                            nextMonster:
+                            for (int m = 0; m < 256 + 16; m++) {
                                 int xPos = monsterData[m * 16 + 0];
                                 int yPos = monsterData[m * 16 + 1];
-                                if (monsterData[m * 16 + 11] == 0)
-                                {
+
+                                if (monsterData[m * 16 + 11] == 0) {
                                     xPos = (random.nextInt(62) + 1) * 16 + 8;
                                     yPos = (random.nextInt(62) + 1) * 16 + 8;
 
                                     int xd = xCam - xPos;
                                     int yd = yCam - yPos;
 
-                                    if (xd * xd + yd * yd < 180 * 180)
-                                    {
+                                    if (xd * xd + yd * yd < 180 * 180) {
                                         xPos = 1;
                                         yPos = 1;
                                     }
 
-                                    if (map[xPos + yPos * 1024] < 0xfffffe && (m <= 128 || rushTime > 0 || (m > 255 && tick == 1)))
-                                    {
+                                    if (map[xPos + yPos * 1024] < 0xfffffe && (m <= 128 || rushTime > 0 || (m > 255 && tick == 1))) {
                                         monsterData[m * 16 + 0] = xPos;
                                         monsterData[m * 16 + 1] = yPos;
                                         monsterData[m * 16 + 15] = map[xPos + yPos * 1024];
@@ -458,37 +483,35 @@ public class L4dFX extends Application {
                                         monsterData[m * 16 + 9] = (rushTime > 0 || random.nextInt(3) == 0) ? 127 : 0;
                                         monsterData[m * 16 + 11] = 1;
                                         monsterData[m * 16 + 2] = m & 15;
-                                    }
-                                    else
-                                    {
+                                    } else {
                                         continue;
                                     }
                                 }
-                                else
-                                {
+                                else {
                                     int xd = xPos - xCam;
                                     int yd = yPos - yCam;
 
-                                    if (m >= 255)
-                                    {
-                                        if (xd * xd + yd * yd < 8 * 8)
-                                        {
+                                    // if item
+                                    if (m >= 255) {
+                                        // if collided with item
+                                        if (xd * xd + yd * yd < 8 * 8) {
                                             map[xPos + yPos * 1024] = monsterData[m * 16 + 15];
                                             monsterData[m * 16 + 11] = 0;
                                             bonusTime = 120;
+
+                                            // restore HP
                                             if ((m & 1) == 0)
                                             {
                                                 damage = 20;
                                             }
-                                            else
+                                            else    // restore clips
                                             {
                                                 clips = 20;
                                             }
+
                                             continue;
                                         }
-                                    }
-                                    else if (xd * xd + yd * yd > 340 * 340)
-                                    {
+                                    } else if (xd * xd + yd * yd > 340 * 340) {
                                         map[xPos + yPos * 1024] = monsterData[m * 16 + 15];
                                         monsterData[m * 16 + 11] = 0;
                                         continue;
@@ -496,8 +519,8 @@ public class L4dFX extends Application {
                                 }
 
 
-                                int xm = xPos - xCam + 120;
-                                int ym = monsterData[m * 16 + 1] - yCam + 120;
+                                int xm = xPos - xCam + W / 2;
+                                int ym = monsterData[m * 16 + 1] - yCam + H / 2;
 
                                 int d = monsterData[m * 16 + 2];
                                 if (m == 0)
@@ -507,7 +530,7 @@ public class L4dFX extends Application {
 
                                 d += ((monsterData[m * 16 + 3] / 4) & 3) * 16;
 
-                                int p = (0 * 16 + d) * 144;
+                                int p = (0 * 16 + d) * 144; // 12 * 12
                                 if (m > 0)
                                 {
                                     p += ((m & 15) + 1) * 144 * 16 * 4;
@@ -518,10 +541,11 @@ public class L4dFX extends Application {
                                     p = (17 * 4 * 16 + ((m & 1) * 16 + (tick & 15))) * 144;
                                 }
 
+                                // puts player + monster data into pixels (draws)
                                 for (int y = ym - 6; y < ym + 6; y++) {
                                     for (int x = xm - 6; x < xm + 6; x++) {
                                         int c = sprites[p++];
-                                        if (c > 0 && x >= 0 && y >= 0 && x < 240 && y < 240) {
+                                        if (c > 0 && x >= 0 && y >= 0 && x < W && y < H) {
                                             pixels[x + y * 240] = c;
                                         }
                                     }
@@ -530,8 +554,9 @@ public class L4dFX extends Application {
 
                                 boolean moved = false;
 
-                                if (monsterData[m * 16 + 10] > 0)
-                                {
+                                // if mob been shot
+                                if (monsterData[m * 16 + 10] > 0) {
+
                                     monsterData[m * 16 + 11] += random.nextInt(3) + 1;
                                     monsterData[m * 16 + 10] = 0;
 
@@ -539,9 +564,9 @@ public class L4dFX extends Application {
                                     int amount = 8;
                                     double poww = 32;
 
-
-                                    if (monsterData[m * 16 + 11] >= 2+level)
-                                    {
+                                    // if monster damage >= 2 + level
+                                    // monster killed
+                                    if (monsterData[m * 16 + 11] >= 2 + level) {
                                         rot = Math.PI * 2;
                                         amount = 60;
                                         poww = 16;
@@ -550,19 +575,21 @@ public class L4dFX extends Application {
                                         score += level;
                                     }
 
-                                    for (int i = 0; i < amount; i++)
-                                    {
+                                    for (int i = 0; i < amount; i++) {
                                         double pow = (random.nextInt(100) * random.nextInt(100)) * poww / 10000+4;
                                         double dir = (random.nextInt(100) - random.nextInt(100)) / 100.0 * rot;
                                         double xdd = (Math.cos(playerDir + dir) * pow) + random.nextInt(4) - random.nextInt(4);
                                         double ydd = (Math.sin(playerDir + dir) * pow) + random.nextInt(4) - random.nextInt(4);
                                         int col = (random.nextInt(128) + 120);
-                                        bloodLoop: for (int j = 2; j < pow; j++)
-                                        {
+
+                                        bloodLoop:
+                                        for (int j = 2; j < pow; j++) {
                                             int xd = (int) (xPos + xdd * j / pow);
                                             int yd = (int) (yPos + ydd * j / pow);
                                             int pp = ((xd) + (yd) * 1024) & (1024 * 1024 - 1);
-                                            if (map[pp] >= 0xff0000) break bloodLoop;
+                                            if (map[pp] >= 0xff0000)
+                                                break bloodLoop;
+
                                             if (random.nextInt(2) != 0)
                                             {
                                                 map[pp] = col << 16;
@@ -577,13 +604,13 @@ public class L4dFX extends Application {
                                 int xPlayerDist = xCam - xPos;
                                 int yPlayerDist = yCam - yPos;
 
-                                if (m <= 255)
-                                {
+                                // if monster
+                                if (m <= 255) {
                                     double rx = -(cos * xPlayerDist - sin * yPlayerDist);
                                     double ry = cos * yPlayerDist + sin * xPlayerDist;
 
-                                    if (rx > -6 && rx < 6 && ry > -6 && ry < 6 && m > 0)
-                                    {
+                                    // take damage from monster
+                                    if (rx > -6 && rx < 6 && ry > -6 && ry < 6 && m > 0) {
                                         damage++;
                                         hurtTime += 20;
                                     }
@@ -599,30 +626,41 @@ public class L4dFX extends Application {
                                         closestHit = m;
                                     }
 
-                                    dirLoop: for (int i = 0; i < 2; i++)
-                                    {
+                                    dirLoop:
+                                    for (int i = 0; i < 2; i++) {
                                         int xa = 0;
                                         int ya = 0;
                                         xPos = monsterData[m * 16 + 0];
                                         yPos = monsterData[m * 16 + 1];
 
-                                        if (m == 0)
-                                        {
-                                            if (k[KeyEvent.VK_A]) xa--;
-                                            if (k[KeyEvent.VK_D]) xa++;
-                                            if (k[KeyEvent.VK_W]) ya--;
-                                            if (k[KeyEvent.VK_S]) ya++;
-                                        }
-                                        else
-                                        {
-                                            if (monsterData[m * 16 + 9] < 8) continue nextMonster;
+                                        // move if player
+                                        if (m == 0) {
+//                                            for (int j = 0; j < 16; j++) {
+//                                                System.out.print(monsterData[j] + "\t");
+//                                            }
+//                                            System.out.println();
 
-                                            if (monsterData[m * 16 + 8] != 12)
-                                            {
+                                            if (k[KeyEvent.VK_A])
+                                                xa--;
+
+                                            if (k[KeyEvent.VK_D])
+                                                xa++;
+
+                                            if (k[KeyEvent.VK_W])
+                                                ya--;
+
+                                            if (k[KeyEvent.VK_S])
+                                                ya++;
+                                        } else {
+                                            // disables AI (aggressiveness)
+                                            if (monsterData[m * 16 + 9] < 258)  // default: 8
+                                                continue nextMonster;
+
+                                            // maybe movement ?
+                                            if (monsterData[m * 16 + 8] != 12) {
                                                 xPlayerDist = (monsterData[m * 16 + 8]) % 5 - 2;
                                                 yPlayerDist = (monsterData[m * 16 + 8]) / 5 - 2;
-                                                if (random.nextInt(10) == 0)
-                                                {
+                                                if (random.nextInt(10) == 0) {
                                                     monsterData[m * 16 + 8] = 12;
                                                 }
                                             }
@@ -630,16 +668,20 @@ public class L4dFX extends Application {
                                             double xxd = Math.sqrt(xPlayerDist * xPlayerDist);
                                             double yyd = Math.sqrt(yPlayerDist * yPlayerDist);
 
-                                            if (random.nextInt(1024) / 1024.0 < yyd / xxd)
-                                            {
-                                                if (yPlayerDist < 0) ya--;
-                                                if (yPlayerDist > 0) ya++;
+                                            if (random.nextInt(1024) / 1024.0 < yyd / xxd) {
+                                                if (yPlayerDist < 0)
+                                                    ya--;
+
+                                                if (yPlayerDist > 0)
+                                                    ya++;
                                             }
 
-                                            if (random.nextInt(1024) / 1024.0 < xxd / yyd)
-                                            {
-                                                if (xPlayerDist < 0) xa--;
-                                                if (xPlayerDist > 0) xa++;
+                                            if (random.nextInt(1024) / 1024.0 < xxd / yyd) {
+                                                if (xPlayerDist < 0)
+                                                    xa--;
+
+                                                if (xPlayerDist > 0)
+                                                    xa++;
                                             }
 
                                             moved = true;
@@ -650,17 +692,18 @@ public class L4dFX extends Application {
                                         ya *= i;
                                         xa *= 1 - i;
 
-                                        if (xa != 0 || ya != 0)
-                                        {
+                                        // collision detection ?
+                                        if (xa != 0 || ya != 0) {
                                             map[xPos + yPos * 1024] = monsterData[m * 16 + 15];
-                                            for (int xx = xPos + xa - 3; xx <= xPos + xa + 3; xx++)
-                                                for (int yy = yPos + ya - 3; yy <= yPos + ya + 3; yy++)
-                                                    if (map[xx + yy * 1024] >= 0xfffffe)
-                                                    {
+                                            for (int xx = xPos + xa - 3; xx <= xPos + xa + 3; xx++) {
+                                                for (int yy = yPos + ya - 3; yy <= yPos + ya + 3; yy++) {
+                                                    if (map[xx + yy * 1024] >= 0xfffffe) {
                                                         map[xPos + yPos * 1024] = 0xfffffe;
                                                         monsterData[m * 16 + 8] = random.nextInt(25);
                                                         continue dirLoop;
                                                     }
+                                                }
+                                            }
 
                                             moved = true;
                                             monsterData[m * 16 + 0] += xa;
@@ -669,15 +712,16 @@ public class L4dFX extends Application {
                                             map[(xPos + xa) + (yPos + ya) * 1024] = 0xfffffe;
                                         }
                                     }
-                                    if (moved)
-                                    {
+
+                                    // makes an entity move (animation on screen)
+                                    if (moved) {
                                         monsterData[m * 16 + 3]++;
                                     }
                                 }
                             }
 
-                            if (shoot)
-                            {
+                            if (shoot) {
+                                // if no ammo
                                 if (ammo >= 220)
                                 {
                                     shootDelay = 2;
@@ -688,11 +732,13 @@ public class L4dFX extends Application {
                                     shootDelay = 1;
                                     ammo += 4;
                                 }
-                                if (closestHit > 0)
-                                {
+
+                                // if there is a hit we mark the mob
+                                if (closestHit > 0) {
                                     monsterData[closestHit * 16 + 10] = 1;
                                     monsterData[closestHit * 16 + 9] = 127;
                                 }
+
                                 int glow = 0;
                                 for (int j = closestHitDist; j >= 0; j--)
                                 {
@@ -733,17 +779,15 @@ public class L4dFX extends Application {
                                     {
                                         double pow = random.nextInt(100) * random.nextInt(100) * 8.0 / 10000;
                                         double dir = (random.nextInt(100) - random.nextInt(100)) / 100.0;
+
                                         int xd = (int) (xx - Math.cos(playerDir + dir) * pow) + random.nextInt(4) - random.nextInt(4);
                                         int yd = (int) (yy - Math.sin(playerDir + dir) * pow) + random.nextInt(4) - random.nextInt(4);
 
-                                        if (xd >= 0 && yd >= 0 && xd < 240 && yd < 240)
-                                        {
-                                            if (closestHit > 0)
-                                            {
+                                        if (xd >= 0 && yd >= 0 && xd < W && yd < H) {
+                                            if (closestHit > 0) {
                                                 pixels[xd + yd * 240] = 0xff0000;
                                             }
-                                            else
-                                            {
+                                            else {
                                                 pixels[xd + yd * 240] = 0xcacaca;
                                             }
                                         }
@@ -776,6 +820,7 @@ public class L4dFX extends Application {
                     bonusTime = bonusTime * 8 / 9;
                     hurtTime /= 2;
 
+                    // render
                     for (int y = 0; y < H; y++) {
                         for (int x = 0; x < W; x++) {
                             int noise = random.nextInt(16) * random.nextInt(16) / 16;
@@ -923,7 +968,7 @@ public class L4dFX extends Application {
 
             }
 
-            m = (int)e.getSceneX() / 2 + (int)e.getSceneY() / 2 * 240;
+            globalMouse = (int)e.getSceneX() / 2 + (int)e.getSceneY() / 2 * 240;
         });
 
         stage.setOnCloseRequest(e -> System.exit(0));
