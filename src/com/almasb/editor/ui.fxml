@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+
+<BorderPane prefHeight="600.0" prefWidth="800.0"
+            xmlns="http://javafx.com/javafx/8.0.65"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.almasb.editor.EditorController">
+
+   <top>
+      <MenuBar BorderPane.alignment="CENTER">
+          <Menu text="File">
+              <MenuItem text="Save" onAction="#onSave" />
+              <MenuItem text="Load" onAction="#onLoad" />
+              <MenuItem text="Close" onAction="#onClose" />
+          </Menu>
+
+          <Menu text="Help">
+              <MenuItem text="About" onAction="#onAbout" />
+          </Menu>
+      </MenuBar>
+   </top>
+
+   <bottom>
+      <HBox prefHeight="63.0" prefWidth="600.0" BorderPane.alignment="CENTER" />
+   </bottom>
+
+   <center>
+      <TextArea fx:id="areaText" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+   </center>
+</BorderPane>
