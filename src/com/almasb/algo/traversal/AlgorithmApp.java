@@ -1,4 +1,4 @@
-package com.almasb.algo;
+package com.almasb.algo.traversal;
 
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;

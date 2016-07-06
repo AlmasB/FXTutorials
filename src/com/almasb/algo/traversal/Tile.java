@@ -1,4 +1,4 @@
-package com.almasb.algo;
+package com.almasb.algo.traversal;
 
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;

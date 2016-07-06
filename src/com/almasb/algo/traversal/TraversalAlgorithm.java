@@ -1,4 +1,4 @@
-package com.almasb.algo;
+package com.almasb.algo.traversal;
 
 import java.util.List;
 
