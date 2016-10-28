@@ -1,0 +1,8 @@
+.alarm {
+    -fx-background-color: white;
+}
+
+.alarm_text {
+    -fx-fill: black;
+    -fx-font-size: 48px;
+}

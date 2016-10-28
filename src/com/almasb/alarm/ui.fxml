@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox fx:id="root" spacing="10" alignment="TOP_CENTER" prefWidth="300" prefHeight="370" xmlns:fx="http://javafx.com/fxml">
+
+    <MenuBar>
+        <Menu text="Alarm">
+            <MenuItem text="Add..." onAction="#onAdd" />
+            <MenuItem text="Switch Theme" onAction="#onSwitchTheme" />
+        </Menu>
+    </MenuBar>
+
+    <ListView fx:id="listView">
+
+    </ListView>
+</VBox>
