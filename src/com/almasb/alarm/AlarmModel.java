@@ -39,7 +39,10 @@ public class AlarmModel {
 
     private void tick() {
         Platform.runLater(() -> {
-            alarms.stream().filter(a -> LocalTime.now().isAfter(a.getTime())).forEach(Alarm::report);
+            alarms.stream()
+                    .filter(a -> LocalTime.now().isAfter(a.getTime()))
+                    .forEach(Alarm::report);
+
             alarms.removeIf(a -> !a.isActive());
         });
     }
