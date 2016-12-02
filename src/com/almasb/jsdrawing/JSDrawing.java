@@ -1,4 +1,4 @@
-package demo.javafx.jsdrawing;
+package com.almasb.jsdrawing;
 
 import javafx.application.Application;
 import javafx.fxml.FXML;
