@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.*?>
+<?import java.lang.*?>
+<?import javafx.collections.*?>
+<?import javafx.beans.property.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.paint.Color?>
+<?import javafx.animation.*?>
+<?import javafx.util.*?>
+
+<Pane xmlns:fx="http://javafx.com/fxml">
+    <fx:define>
+        <Integer fx:id="appWidth" fx:value="1280" />
+        <Integer fx:id="appHeight" fx:value="720" />
+        <Integer fx:id="blockSize" fx:value="60" />
+        <Integer fx:id="playerSize" fx:value="40" />
+    </fx:define>
+</Pane>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.*?>
+<?import java.lang.*?>
+<?import javafx.collections.*?>
+<?import javafx.beans.property.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.paint.Color?>
+<?import javafx.animation.*?>
+<?import javafx.util.*?>
+
+<Pane xmlns:fx="http://javafx.com/fxml">
+    <fx:define>
+        <SimpleIntegerProperty fx:id="score" />
+    </fx:define>
+
+    <Rectangle width="1280" height="720" />
+    
+    <Pane fx:id="gameRoot">
+        <Rectangle fx:id="player" width="40" height="40" fill="blue" translateX="0" translateY="600">
+            <properties alive="true" />
+        </Rectangle>
+    </Pane>
+    
+    <Pane fx:id="uiRoot">
+        <Text fx:id="textScore" translateX="100" translateY="100" fill="white" />
+    </Pane>
+</Pane>
+
