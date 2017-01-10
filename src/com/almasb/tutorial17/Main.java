@@ -45,7 +45,7 @@ public class Main extends Application {
             System.out.println("Selected: " + newValue);
         });
 
-        try (InputStream is = Files.newInputStream(Paths.get("res/images/farcry_gameplay.jpg"))) {
+        try (InputStream is = getClass().getResourceAsStream("farcry_gameplay.jpg")) {
             Image img = new Image(is);
             ImageView imgView = new ImageView(img);
             imgView.setFitWidth(1280);
