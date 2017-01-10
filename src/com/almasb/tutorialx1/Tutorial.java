@@ -3,6 +3,7 @@ package com.almasb.tutorialx1;
 import javafx.animation.Animation;
 import javafx.animation.TranslateTransition;
 import javafx.application.Application;
+import javafx.geometry.Point3D;
 import javafx.scene.AmbientLight;
 import javafx.scene.Group;
 import javafx.scene.Parent;
@@ -11,6 +12,7 @@ import javafx.scene.PointLight;
 import javafx.scene.Scene;
 import javafx.scene.SceneAntialiasing;
 import javafx.scene.SubScene;
+import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Box;
@@ -20,7 +22,16 @@ import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
+import java.util.Random;
+
 public class Tutorial extends Application {
+
+    PerspectiveCamera camera;
+
+    Translate translate;
+    Rotate rotate;
+
+    Group worldRoot = new Group();
 
     private Parent createContent() {
         Cube c = new Cube(1, Color.GREEN);
@@ -37,8 +48,10 @@ public class Tutorial extends Application {
         c3.setRotationAxis(Rotate.Y_AXIS);
         c3.setRotate(45);
 
-        PerspectiveCamera camera = new PerspectiveCamera(true);
-        camera.getTransforms().add(new Translate(0, 0, -10));
+        camera = new PerspectiveCamera(true);
+        translate = new Translate(0, 0, -10);
+        rotate = new Rotate(0, new Point3D(0, 1, 0));
+        camera.getTransforms().addAll(translate, rotate);
 
         PointLight light = new PointLight(Color.WHITE);
         light.setTranslateX(3);
@@ -52,10 +65,10 @@ public class Tutorial extends Application {
 
         AmbientLight globalLight = new AmbientLight(Color.WHITE.deriveColor(0, 1, 0.2, 1));
 
-        Group root = new Group();
-        root.getChildren().addAll(c, c2, c3, globalLight, light);
 
-        SubScene subScene = new SubScene(root, 640, 480, true, SceneAntialiasing.BALANCED);
+        worldRoot.getChildren().addAll(c, c2, c3, globalLight, light);
+
+        SubScene subScene = new SubScene(worldRoot, 800, 600, true, SceneAntialiasing.BALANCED);
         subScene.setCamera(camera);
 
         tt.play();
@@ -63,9 +76,46 @@ public class Tutorial extends Application {
         return new Group(new Rectangle(800, 600), subScene);
     }
 
+    private void placeCube(Point3D point) {
+        Random random = new Random();
+        Cube cube = new Cube(1, Color.rgb(random.nextInt(150) + 100, random.nextInt(150) + 100, random.nextInt(250)));
+        cube.setTranslateX(point.getX());
+        cube.setTranslateY(point.getY());
+        cube.setTranslateZ(point.getZ());
+        worldRoot.getChildren().add(cube);
+    }
+
     @Override
     public void start(Stage primaryStage) throws Exception {
         Scene scene = new Scene(createContent());
+
+        placeCube(new Point3D(10, 0, 0));
+        placeCube(new Point3D(-10, 0, 0));
+        placeCube(new Point3D(0, 0, -20));
+
+        scene.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.W) {
+                translate.setZ(translate.getZ() + 1);
+            } else if (event.getCode() == KeyCode.S) {
+                translate.setZ(translate.getZ() - 1);
+            } else if (event.getCode() == KeyCode.A) {
+                //rotate.setAngle(rotate.getAngle() - 5);
+                translate.setX(translate.getX() - 1);
+            } else if (event.getCode() == KeyCode.D) {
+                //rotate.setAngle(rotate.getAngle() + 5);
+                translate.setX(translate.getX() + 1);
+            }
+
+            if (event.getCode() == KeyCode.UP) {
+
+            } else if (event.getCode() == KeyCode.DOWN) {
+
+            } else if (event.getCode() == KeyCode.LEFT) {
+                rotate.setAngle(rotate.getAngle() - 5);
+            } else if (event.getCode() == KeyCode.RIGHT) {
+                rotate.setAngle(rotate.getAngle() + 5);
+            }
+        });
 
         primaryStage.setScene(scene);
         primaryStage.show();

@@ -8,16 +8,17 @@
 .classpath
 .project
 .settings/
-/bin
+bin/
 
 # IDEA #
 .idea/
 *.iml
-/out
+out/
+lib/
 
 # Maven #
 dependency-reduced-pom.xml
-/target
+target/
 
 # logs #
 *.log
