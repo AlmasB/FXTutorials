@@ -50,11 +50,11 @@ public class Tetromino {
     }
 
     public void rotateBack() {
-        pieces.forEach(p -> p.setDirection(p.direction.prev()));
+        pieces.forEach(p -> p.setDirection(p.directions.stream().map(Direction::prev).collect(Collectors.toList()).toArray(new Direction[0])));
     }
 
     public void rotate() {
-        pieces.forEach(p -> p.setDirection(p.direction.next()));
+        pieces.forEach(p -> p.setDirection(p.directions.stream().map(Direction::next).collect(Collectors.toList()).toArray(new Direction[0])));
     }
 
     public void detach(int x, int y) {

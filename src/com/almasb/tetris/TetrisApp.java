@@ -44,23 +44,29 @@ public class TetrisApp extends Application {
 
         root.getChildren().addAll(canvas);
 
-        original.add(new Tetromino(Color.BLUE,
-                new Piece(0, Direction.DOWN),
-                new Piece(1, Direction.LEFT),
-                new Piece(1, Direction.RIGHT),
-                new Piece(2, Direction.RIGHT)
-        ));
-        original.add(new Tetromino(Color.RED,
-                new Piece(0, Direction.DOWN),
-                new Piece(1, Direction.LEFT),
-                new Piece(1, Direction.RIGHT),
-                new Piece(1, Direction.DOWN)
-        ));
-
+//        original.add(new Tetromino(Color.BLUE,
+//                new Piece(0, Direction.DOWN),
+//                new Piece(1, Direction.LEFT),
+//                new Piece(1, Direction.RIGHT),
+//                new Piece(2, Direction.RIGHT)
+//        ));
+//        original.add(new Tetromino(Color.RED,
+//                new Piece(0, Direction.DOWN),
+//                new Piece(1, Direction.LEFT),
+//                new Piece(1, Direction.RIGHT),
+//                new Piece(1, Direction.DOWN)
+//        ));
+//
         original.add(new Tetromino(Color.GREEN,
                 new Piece(0, Direction.DOWN),
                 new Piece(1, Direction.RIGHT),
                 new Piece(2, Direction.RIGHT),
+                new Piece(1, Direction.DOWN)));
+
+        original.add(new Tetromino(Color.GRAY,
+                new Piece(0, Direction.DOWN),
+                new Piece(1, Direction.RIGHT),
+                new Piece(1, Direction.RIGHT, Direction.DOWN),
                 new Piece(1, Direction.DOWN)));
 
         spawn();
