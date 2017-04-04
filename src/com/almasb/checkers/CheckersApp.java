@@ -74,7 +74,7 @@ public class CheckersApp extends Application {
     }
 
     private int toBoard(double pixel) {
-        return (int)(pixel + TILE_SIZE / 2) / TILE_SIZE;
+        return (int) ((pixel + TILE_SIZE) / TILE_SIZE) - 1;
     }
 
     @Override
