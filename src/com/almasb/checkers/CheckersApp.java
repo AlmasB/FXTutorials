@@ -92,7 +92,13 @@ public class CheckersApp extends Application {
             int newX = toBoard(piece.getLayoutX());
             int newY = toBoard(piece.getLayoutY());
 
-            MoveResult result = tryMove(piece, newX, newY);
+            MoveResult result;
+
+            if (newX < 0 || newY < 0 || newX >= WIDTH || newY >= HEIGHT) {
+                result = new MoveResult(MoveType.NONE);
+            } else {
+                result = tryMove(piece, newX, newY);
+            }
 
             int x0 = toBoard(piece.getOldX());
             int y0 = toBoard(piece.getOldY());
