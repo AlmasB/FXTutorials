@@ -32,7 +32,7 @@ public class Civ6MenuItem extends Pane {
         bg.setEffect(new GaussianBlur());
 
         bg.fillProperty().bind(
-                Bindings.when(hoverProperty())
+                Bindings.when(pressedProperty())
                         .then(Color.color(0, 0, 0, 0.75))
                         .otherwise(Color.color(0, 0, 0, 0.25))
         );

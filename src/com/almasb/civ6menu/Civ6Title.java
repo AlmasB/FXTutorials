@@ -13,7 +13,12 @@ public class Civ6Title extends Pane {
     private Text text;
 
     public Civ6Title(String name) {
-        text = new Text(name);
+        String spread = "";
+        for (char c : name.toCharArray()) {
+            spread += c + " ";
+        }
+
+        text = new Text(spread);
         text.setFont(Font.loadFont(Civ6MenuApp.class.getResource("res/Penumbra-HalfSerif-Std_35114.ttf").toExternalForm(), 48));
         text.setFill(Color.WHITE);
         text.setEffect(new DropShadow(30, Color.BLACK));
