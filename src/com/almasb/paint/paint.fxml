@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.scene.canvas.Canvas?>
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.almasb.paint.PaintController"
+            prefHeight="600.0" prefWidth="600.0">
+
+    <top>
+        <VBox>
+            <MenuBar>
+                <Menu text="File">
+                    <MenuItem text="Save" onAction="#onSave" />
+                    <MenuItem text="Exit" onAction="#onExit" />
+                </Menu>
+            </MenuBar>
+
+            <ToolBar>
+                <HBox alignment="CENTER" spacing="5">
+                    <TextField fx:id="brushSize" text="18" />
+                    <ColorPicker fx:id="colorPicker" />
+                    <CheckBox fx:id="eraser" text="Eraser" />
+                </HBox>
+            </ToolBar>
+        </VBox>
+    </top>
+
+    <center>
+        <Canvas fx:id="canvas" width="600" height="600" />
+    </center>
+
+</BorderPane>
