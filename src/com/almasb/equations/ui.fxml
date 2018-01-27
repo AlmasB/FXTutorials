@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Label?>
+<?import javafx.geometry.Insets?>
+
+<VBox prefHeight="100.0" prefWidth="300.0"
+      xmlns="http://javafx.com/javafx/8.0.65"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.almasb.equations.EquationsController">
+
+    <padding>
+        <Insets topRightBottomLeft="25" />
+    </padding>
+
+    <TextField fx:id="fieldInput" onAction="#solve" />
+
+    <Label fx:id="labelOutput" />
+
+</VBox>
