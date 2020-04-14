@@ -30,7 +30,7 @@ public class WordExtractor implements DataExtractor {
 
             List<Entry> entries = new ArrayList<>();
 
-            map.forEach((word, freq) -> entries.add(new Entry(word, (int) ((long) freq))));
+            map.forEach((word, freq) -> entries.add(new Entry(word, freq.intValue())));
 
             return entries;
 
