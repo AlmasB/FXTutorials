@@ -6,8 +6,12 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.IntStream;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -18,7 +22,7 @@ import javafx.stage.Stage;
 
 public class DownloaderApp extends Application {
 
-
+    private ExecutorService service = Executors.newCachedThreadPool();
 
     private Parent createContent() {
         VBox root = new VBox();
@@ -28,20 +32,56 @@ public class DownloaderApp extends Application {
         root.getChildren().addAll(fieldURL);
 
         fieldURL.setOnAction(event -> {
-            Task<Void> task = new DownloadTask(fieldURL.getText());
-            ProgressBar progressBar = new ProgressBar();
-            progressBar.setPrefWidth(350);
-            progressBar.progressProperty().bind(task.progressProperty());
-            root.getChildren().add(progressBar);
 
-            fieldURL.clear();
+            // 2 jobs: 2x6 ticks
+            // Sequential
+            // ------------
 
-            Thread thread = new Thread(task);
-            thread.setDaemon(true);
-            thread.start();
+            // Concurrency
+            // 1: --  --  --
+            // 2:   --  --  --
+
+            // Parallelism
+            // 1: ------
+            // 2: ------
+
+            IntStream.rangeClosed(1, 3)
+                    .parallel()
+                    .forEach(index -> {
+                        doHeavyWork();
+
+                        System.out.println("Completed on core: " + index);
+                    });
+
+            //service.submit(this::doHeavyWork);
+
+//            Task<Void> task = new DownloadTask(fieldURL.getText());
+//            ProgressBar progressBar = new ProgressBar();
+//            progressBar.setPrefWidth(350);
+//            progressBar.progressProperty().bind(task.progressProperty());
+//            root.getChildren().add(progressBar);
+//
+//            fieldURL.clear();
+//
+//            Thread thread = new Thread(task);
+//            thread.setDaemon(true);
+//            thread.start();
         });
 
         return root;
+    }
+
+    private void doHeavyWork() {
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            System.out.println("Error: " + e);
+            e.printStackTrace();
+        }
+
+        Platform.runLater(() -> {
+            System.out.println("Work done on thread: " + Thread.currentThread().getName());
+        });
     }
 
     private class DownloadTask extends Task<Void> {
@@ -76,6 +116,7 @@ public class DownloaderApp extends Application {
 
         @Override
         protected void failed() {
+            System.out.println("Finished on thread: " + Thread.currentThread().getName());
             System.out.println("failed");
         }
 
@@ -83,6 +124,11 @@ public class DownloaderApp extends Application {
         protected void succeeded() {
             System.out.println("downloaded");
         }
+    }
+
+    @Override
+    public void stop() throws Exception {
+        service.shutdownNow();
     }
 
     @Override

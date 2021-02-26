@@ -1,3 +1,5 @@
+package com.almasb;
+
 import java.util.Scanner;
 
 public class HangmanMain {

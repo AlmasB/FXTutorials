@@ -18,8 +18,10 @@ public class ChatApp extends Application {
     private NetworkConnection connection = isServer ? createServer() : createClient();
 
     private Parent createContent() {
-        messages.setFont(Font.font(72));
+        messages.setFont(Font.font(36));
         messages.setPrefHeight(550);
+        messages.setEditable(false);
+
         TextField input = new TextField();
         input.setOnAction(event -> {
             String message = isServer ? "Server: " : "Client: ";
@@ -28,8 +30,12 @@ public class ChatApp extends Application {
 
             messages.appendText(message + "\n");
 
+            DataPacket packet = new DataPacket(
+                    new Encryptor().enc(message.getBytes())
+            );
+
             try {
-                connection.send(message);
+                connection.send(packet);
             }
             catch (Exception e) {
                 messages.appendText("Failed to send\n");
@@ -59,16 +65,22 @@ public class ChatApp extends Application {
 
     private Server createServer() {
         return new Server(55555, data -> {
+            DataPacket packet = (DataPacket) data;
+            byte[] original = new Encryptor().dec(packet.getRawBytes());
+
             Platform.runLater(() -> {
-                messages.appendText(data.toString() + "\n");
+                messages.appendText(new String(original) + "\n");
             });
         });
     }
 
     private Client createClient() {
         return new Client("127.0.0.1", 55555, data -> {
+            DataPacket packet = (DataPacket) data;
+            byte[] original = new Encryptor().dec(packet.getRawBytes());
+
             Platform.runLater(() -> {
-                messages.appendText(data.toString() + "\n");
+                messages.appendText(new String(original) + "\n");
             });
         });
     }

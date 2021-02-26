@@ -37,6 +37,9 @@ public abstract class NetworkConnection {
         private Socket socket;
         private ObjectOutputStream out;
 
+        // TCP - slow, reliable
+        // UDP - fast, unreliable
+
         @Override
         public void run() {
             try (ServerSocket server = isServer() ? new ServerSocket(getPort()) : null;
@@ -54,7 +57,8 @@ public abstract class NetworkConnection {
                 }
             }
             catch (Exception e) {
-                onReceiveCallback.accept("Connection closed");
+                DataPacket closePacket = new DataPacket("Connection closed".getBytes());
+                onReceiveCallback.accept(closePacket);
             }
         }
     }

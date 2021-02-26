@@ -26,23 +26,33 @@ import static java.lang.Math.*;
  */
 public class DrawingApp extends Application {
 
+    private static final int W = 1280;
+    private static final int H = 720;
+
     private GraphicsContext g;
 
     private double t = 0.0;
-    private double oldX = 400, oldY = 300;
+    private double oldX = W / 2, oldY = H / 2;
+
+    private boolean start = false;
 
     private Parent createContent() {
         Pane root = new Pane();
-        root.setPrefSize(800, 600);
+        root.setPrefSize(W, H);
 
-        Canvas canvas = new Canvas(800, 600);
+        Canvas canvas = new Canvas(W, H);
         g = canvas.getGraphicsContext2D();
 
         AnimationTimer timer = new AnimationTimer() {
             @Override
             public void handle(long now) {
-                t += 0.017;
-                draw();
+                if (!start)
+                    return;
+
+                for (int i = 0; i < 80; i++) {
+                    t += 0.017;
+                    draw();
+                }
             }
         };
         timer.start();
@@ -54,26 +64,36 @@ public class DrawingApp extends Application {
     private void draw() {
         Point2D p = curveFunction();
 
-        g.setStroke(Color.BLUE);
+        g.setStroke(Color.BLACK);
 
-        double newX = 400 + p.getX();
-        double newY = 300 + p.getY();
+        double newX = W / 2 + p.getX();
+        double newY = H / 2 + p.getY();
 
-        if (oldX != 400 && oldY != 300)
+        if (oldX != W / 2 && oldY != H / 2) {
             g.strokeLine(oldX, oldY, newX, newY);
-
-        //g.strokeOval(newX, newY, 1, 1);
+            //g.strokeOval(newX, newY, 1, 1);
+        }
+        //
 
         oldX = newX;
         oldY = newY;
     }
 
     private Point2D curveFunction() {
-        double x = sin(t) * (pow(E, cos(t)) - 2 * cos(4*t) - pow(sin(t/12), 5));
-        double y = cos(t) * (pow(E, cos(t)) - 2 * cos(4*t) - pow(sin(t/12), 5));
+        // pow(cos(t/8), 3) is the important bit, where 8 to change
 
-        return new Point2D(x, -y).multiply(85);
+        double x = sin(t) + pow(cos(t/35), 3) * cos(8*t) * 55 / t;
+        double y = cos(t) * 2 + cos(2*t) + pow(sin(t/2), 4);
+
+        return new Point2D(x, -y).multiply(100);
     }
+
+//    private Point2D curveFunction() {
+//        double x = sin(t) * (pow(E, cos(t)) - 2 * cos(4*t) - pow(sin(t/12), 5));
+//        double y = cos(t) * (pow(E, cos(t)) - 2 * cos(4*t) - pow(sin(t/12), 5));
+//
+//        return new Point2D(x, -y).multiply(85);
+//    }
 
     private void saveScreenshot(Scene scene) {
         WritableImage fxImage = scene.snapshot(null);
@@ -92,7 +112,8 @@ public class DrawingApp extends Application {
         Scene scene = new Scene(createContent());
         scene.setOnKeyReleased(e -> {
             if (e.getCode() == KeyCode.ENTER) {
-                saveScreenshot(scene);
+                start = true;
+                //saveScreenshot(scene);
             }
         });
 
