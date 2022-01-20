@@ -15,6 +15,12 @@ import javafx.stage.Stage;
  */
 public class BasicApp extends Application {
 
+    @Override
+    public void start(Stage stage) throws Exception {
+        stage.setScene(new Scene(createContent()));
+        stage.show();
+    }
+
     private Parent createContent() {
         VBox root = new VBox();
         root.setPrefSize(600, 600);
@@ -28,23 +34,15 @@ public class BasicApp extends Application {
         Button button = new Button("Press");
         button.setFont(Font.font(18));
 
-        output.textProperty().bind(input.textProperty());
-
-//        button.setOnAction(e -> {
-//            output.setText(input.getText());
-//        });
+        button.setOnAction(e -> {
+            output.setText(input.getText());
+        });
 
         root.getChildren().addAll(
                 input, button, output
         );
 
         return root;
-    }
-
-    @Override
-    public void start(Stage stage) throws Exception {
-        stage.setScene(new Scene(createContent()));
-        stage.show();
     }
 
     public static void main(String[] args) {
