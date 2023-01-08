@@ -48,7 +48,7 @@ public class SnowAnimationApp extends Application {
         particles = new ArrayList<>();
 
         for (int i = 0; i < NUM_PARTICLES; i++) {
-            particles.add(new SnowParticle(RANDOM.nextInt(1280), 0, Duration.millis(i*10)));
+            particles.add(new SnowParticle(RANDOM.nextInt(1280), 0, Duration.millis(i*2)));
         }
 
         textToPixels();
@@ -104,9 +104,13 @@ public class SnowAnimationApp extends Application {
                     while (p.y > 0 && collisionMap[p.x][p.y] == 2) {
                         p.y--;
                     }
+
+                    // for icicle like effects
+                    //collisionMap[p.x][p.y] = 2;
                 }
 
-                if (collisionMap[p.x][p.y] == 1) {
+                // the chance on the right controls whether the snow particle stays and falls through
+                if (collisionMap[p.x][p.y] == 1 && RANDOM.nextBoolean()) {
                     p.isMoving = false;
                     collisionMap[p.x][p.y] = 2;
                 }
